@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPROUT.SYS — Garden Device Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:      #F2E3C6;
+    --tan:        #D9BD93;
+    --tan-dark:   #C2A372;
+    --brown:      #8B6444;
+    --brown-deep: #5A3E28;
+    --ink:        #3C2A1B;
+    --on-green:   #6F9A4C;
+    --on-green-d: #4B6B30;
+    --off-red:    #B8543F;
+    --off-red-d:  #7E392A;
+    --amber:      #D89A3D;
+    --amber-d:    #9A6B26;
+    --pixel: 4px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(90,62,40,0.04) 0 var(--pixel), transparent var(--pixel) calc(var(--pixel)*2)),
+      repeating-linear-gradient(90deg, rgba(90,62,40,0.04) 0 var(--pixel), transparent var(--pixel) calc(var(--pixel)*2)),
+      var(--cream);
+    color: var(--ink);
+    font-family: 'VT323', monospace;
+    min-height: 100vh;
+    image-rendering: pixelated;
+    padding: 28px 16px 60px;
+  }
+
+  .pixel-font{ font-family:'Press Start 2P', monospace; }
+
+  /* ---------- header ---------- */
+  header{
+    max-width: 980px;
+    margin: 0 auto 28px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+
+  .pot-icon{ width:56px; height:56px; image-rendering:pixelated; flex-shrink:0; }
+
+  .title-block h1{
+    font-family:'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--brown-deep);
+    text-shadow: 2px 2px 0 var(--tan-dark);
+    letter-spacing: 1px;
+    line-height:1.6;
+  }
+  .title-block p{
+    font-size: 20px;
+    color: var(--brown);
+    margin-top:6px;
+  }
+
+  .header-right{
+    margin-left:auto;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:6px;
+  }
+  #clock{
+    font-size:20px;
+    color:var(--brown-deep);
+  }
+  #conn{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px;
+    padding:6px 8px;
+    border:3px solid var(--brown-deep);
+    background: var(--on-green);
+    color: var(--cream);
+    box-shadow: 3px 3px 0 var(--brown-deep);
+  }
+  #conn.bad{ background: var(--off-red); }
+
+  /* ---------- summary strip ---------- */
+  .summary{
+    max-width: 980px;
+    margin: 0 auto 30px;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+    gap: 14px;
+  }
+  .summary .chip{
+    border:3px solid var(--brown-deep);
+    background: var(--tan);
+    box-shadow: 4px 4px 0 var(--brown-deep);
+    padding: 12px 14px;
+    text-align:center;
+  }
+  .summary .chip .num{
+    font-family:'Press Start 2P', monospace;
+    font-size:20px;
+    color: var(--brown-deep);
+  }
+  .summary .chip .lbl{
+    font-size:17px;
+    color: var(--ink);
+    margin-top:4px;
+    letter-spacing:0.5px;
+  }
+
+  /* ---------- grid ---------- */
+  .grid{
+    max-width: 980px;
+    margin: 0 auto;
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap: 20px;
+  }
+
+  .card{
+    border: 3px solid var(--brown-deep);
+    background: var(--tan);
+    box-shadow: 6px 6px 0 var(--brown-deep);
+    padding: 16px;
+    position:relative;
+    transition: transform .08s linear;
+  }
+  .card:hover{ transform: translate(-2px,-2px); }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:8px;
+    background: repeating-linear-gradient(90deg, var(--brown-deep) 0 8px, var(--tan-dark) 8px 16px);
+  }
+
+  .card .row1{
+    display:flex; align-items:center; gap:12px; margin-top:10px;
+  }
+  .card .icon{ width:40px; height:40px; image-rendering:pixelated; flex-shrink:0; }
+  .card .name{
+    font-family:'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--brown-deep);
+    line-height:1.5;
+  }
+  .card .type{
+    font-size:16px;
+    color: var(--brown);
+    margin-top:2px;
+  }
+
+  .card .meta{
+    margin-top:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    font-size:17px;
+  }
+  .card .pin{ color: var(--ink); }
+  .card .pin b{ color:var(--brown-deep); }
+
+  .status-tag{
+    font-family:'Press Start 2P', monospace;
+    font-size:10px;
+    padding:6px 8px;
+    border:2px solid var(--ink);
+    color:#fff;
+  }
+  .status-on{ background: var(--on-green); border-color: var(--on-green-d); }
+  .status-off{ background: var(--off-red); border-color: var(--off-red-d); }
+  .status-active{ background: var(--amber); border-color: var(--amber-d); }
+
+  .card .ts{
+    margin-top:10px;
+    font-size:14px;
+    color: var(--brown);
+    opacity:0.85;
+    border-top: 2px dashed var(--brown-deep);
+    padding-top:8px;
+  }
+
+  /* sensor numeric readout */
+  .reading{
+    margin-top:14px;
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+    border:2px solid var(--brown-deep);
+    background: var(--cream);
+    padding: 8px 10px;
+  }
+  .reading-num{
+    font-family:'Press Start 2P', monospace;
+    font-size: 22px;
+    color: var(--brown-deep);
+  }
+  .reading-unit{
+    font-size: 18px;
+    color: var(--brown);
+  }
+  .meta-sensor{ margin-top:8px; }
+  .reading-state{
+    font-size:16px;
+    color: var(--amber-d);
+    letter-spacing:0.5px;
+  }
+
+  /* led glow dot */
+  .led-dot{
+    width:10px;height:10px;
+    display:inline-block;
+    margin-right:6px;
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+  .led-on{ background: var(--on-green); box-shadow: 0 0 0 2px var(--ink), 0 0 8px 2px var(--on-green); }
+  .led-off{ background: #6b5a44; }
+
+  footer{
+    max-width:980px;
+    margin: 36px auto 0;
+    text-align:center;
+    font-size:15px;
+    color: var(--brown);
+  }
+  footer .pixel-font{ font-size:8px; color:var(--brown-deep); display:block; margin-bottom:8px; }
+
+  @media (max-width:520px){
+    .title-block h1{ font-size:14px; }
+    .header-right{ margin-left:0; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="pot-icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
+    <rect x="6" y="0" width="1" height="2" fill="#4B6B30"/>
+    <rect x="9" y="0" width="1" height="2" fill="#4B6B30"/>
+    <rect x="7" y="1" width="2" height="2" fill="#6F9A4C"/>
+    <rect x="5" y="2" width="6" height="1" fill="#6F9A4C"/>
+    <rect x="4" y="3" width="8" height="1" fill="#8B6444"/>
+    <rect x="3" y="4" width="10" height="1" fill="#8B6444"/>
+    <rect x="3" y="5" width="10" height="6" fill="#A67B5B"/>
+    <rect x="3" y="5" width="10" height="2" fill="#C2A372"/>
+    <rect x="4" y="11" width="8" height="1" fill="#5A3E28"/>
+    <rect x="5" y="12" width="6" height="1" fill="#5A3E28"/>
+  </svg>
+  <div class="title-block">
+    <h1>SPROUT.SYS</h1>
+    <p>Garden Device Control Hub</p>
+  </div>
+  <div class="header-right">
+    <span id="clock">--:--:--</span>
+    <span id="conn" class="pixel-font">CONNECTING…</span>
+  </div>
+</header>
+
+<div class="summary" id="summary"></div>
+
+<div class="grid" id="grid">
+  <p class="pixel-font" style="font-size:11px;color:var(--brown);">LOADING DEVICES…</p>
+</div>
+
+<footer>
+  <span class="pixel-font">SPROUT.SYS v1.0</span>
+  Auto-refresh every 15s · Source: tc.sbtc-mng.com/api.php
+</footer>
+
+<script>
+const API_URL = "http://tc.sbtc-mng.com/api.php";
+
+// fallback snapshot in case the live endpoint can't be reached from the browser (CORS / mixed-content)
+const FALLBACK = {
+  success: true, count: 5,
+  data: [
+    {id:"1",device_name:"LED1",device_type:"LED",pin:"13",status:"ON",created_at:"2026-06-30 10:16:41"},
+    {id:"2",device_name:"LED2",device_type:"LED",pin:"12",status:"OFF",created_at:"2026-06-30 10:16:41"},
+    {id:"3",device_name:"Temperature",device_type:"SENSOR",pin:"34",status:"ACTIVE",created_at:"2026-06-30 10:16:41"},
+    {id:"4",device_name:"Humidity",device_type:"SENSOR",pin:"35",status:"ACTIVE",created_at:"2026-06-30 10:16:41"},
+    {id:"5",device_name:"Soil Moisture",device_type:"SENSOR",pin:"36",status:"ACTIVE",created_at:"2026-06-30 10:16:41"}
+  ]
+};
+
+function pixelIcon(type, name){
+  const n = name.toLowerCase();
+  if(type === "LED"){
+    return `<svg class="icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="6" y="0" width="4" height="1" fill="#5A3E28"/>
+      <rect x="5" y="1" width="6" height="5" fill="#D89A3D"/>
+      <rect x="5" y="1" width="2" height="2" fill="#F2D9A0"/>
+      <rect x="6" y="6" width="4" height="2" fill="#9A6B26"/>
+      <rect x="6" y="8" width="1" height="3" fill="#5A3E28"/>
+      <rect x="9" y="8" width="1" height="3" fill="#5A3E28"/>
+      <rect x="6" y="11" width="4" height="1" fill="#3C2A1B"/>
+    </svg>`;
+  }
+  if(n.includes("temp")){
+    return `<svg class="icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="7" y="1" width="2" height="8" fill="#C2A372"/>
+      <rect x="6" y="9" width="4" height="1" fill="#C2A372"/>
+      <rect x="5" y="10" width="6" height="4" fill="#B8543F"/>
+      <rect x="7" y="3" width="2" height="6" fill="#7E392A"/>
+      <rect x="6" y="0" width="4" height="1" fill="#5A3E28"/>
+    </svg>`;
+  }
+  if(n.includes("humid")){
+    return `<svg class="icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
+      <rect x="7" y="1" width="2" height="1" fill="#4B6B30"/>
+      <rect x="6" y="2" width="4" height="1" fill="#4B6B30"/>
+      <rect x="5" y="3" width="6" height="2" fill="#6F9A4C"/>
+      <rect x="4" y="5" width="8" height="3" fill="#6F9A4C"/>
+      <rect x="4" y="8" width="8" height="3" fill="#4B6B30"/>
+      <rect x="6" y="6" width="2" height="2" fill="#A8CC8C"/>
+    </svg>`;
+  }
+  return `<svg class="icon" viewBox="0 0 16 16" shape-rendering="crispEdges">
+    <rect x="3" y="10" width="10" height="3" fill="#5A3E28"/>
+    <rect x="3" y="10" width="10" height="1" fill="#8B6444"/>
+    <rect x="5" y="6" width="2" height="2" fill="#4B6B30"/>
+    <rect x="9" y="5" width="2" height="3" fill="#6F9A4C"/>
+    <rect x="7" y="7" width="2" height="3" fill="#4B6B30"/>
+  </svg>`;
+}
+
+function statusClass(status){
+  if(status === "ON") return "status-on";
+  if(status === "OFF") return "status-off";
+  return "status-active";
+}
+
+function sensorUnit(name){
+  const n = name.toLowerCase();
+  if(n.includes("temp")) return "°C";
+  if(n.includes("humid")) return "%";
+  if(n.includes("soil")) return "%";
+  return "";
+}
+
+// Reads a value field if the API provides one (value / reading / sensor_value).
+// Falls back to "--" so we never invent a number that wasn't measured.
+function sensorValue(d){
+  const raw = d.value ?? d.reading ?? d.sensor_value;
+  if(raw === undefined || raw === null || raw === "") return "--";
+  const num = Number(raw);
+  return Number.isFinite(num) ? num.toFixed(1) : raw;
+}
+
+function render(payload){
+  const grid = document.getElementById('grid');
+  const summary = document.getElementById('summary');
+  const data = payload.data || [];
+
+  const onCount = data.filter(d => d.status === "ON").length;
+  const activeCount = data.filter(d => d.status === "ACTIVE").length;
+  const ledCount = data.filter(d => d.device_type === "LED").length;
+  const sensorCount = data.filter(d => d.device_type === "SENSOR").length;
+
+  summary.innerHTML = `
+    <div class="chip"><div class="num">${data.length}</div><div class="lbl">DEVICES</div></div>
+    <div class="chip"><div class="num">${ledCount}</div><div class="lbl">LEDS · ${onCount} ON</div></div>
+    <div class="chip"><div class="num">${sensorCount}</div><div class="lbl">SENSORS · ${activeCount} ACTIVE</div></div>
+  `;
+
+  grid.innerHTML = data.map(d => `
+    <div class="card">
+      <div class="row1">
+        ${pixelIcon(d.device_type, d.device_name)}
+        <div>
+          <div class="name">${d.device_name.toUpperCase()}</div>
+          <div class="type">${d.device_type}</div>
+        </div>
+      </div>
+      ${d.device_type === 'LED' ? `
+      <div class="meta">
+        <span class="pin">PIN <b>${d.pin}</b></span>
+        <span class="status-tag ${statusClass(d.status)}">
+          <span class="led-dot ${d.status==='ON'?'led-on':'led-off'}"></span>${d.status}
+        </span>
+      </div>` : `
+      <div class="reading">
+        <span class="reading-num">${sensorValue(d)}</span><span class="reading-unit">${sensorUnit(d.device_name)}</span>
+      </div>
+      <div class="meta meta-sensor">
+        <span class="pin">PIN <b>${d.pin}</b></span>
+        <span class="reading-state">${d.status}</span>
+      </div>`}
+      <div class="ts">UPDATED ${d.created_at}</div>
+    </div>
+  `).join('');
+}
+
+function setClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('th-TH', { hour12:false });
+}
+setInterval(setClock, 1000);
+setClock();
+
+async function loadData(){
+  const connEl = document.getElementById('conn');
+  try{
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if(!res.ok) throw new Error("bad response");
+    const json = await res.json();
+    render(json);
+    connEl.textContent = "LIVE";
+    connEl.classList.remove('bad');
+  }catch(err){
+    render(FALLBACK);
+    connEl.textContent = "OFFLINE · CACHED";
+    connEl.classList.add('bad');
+  }
+}
+
+loadData();
+setInterval(loadData, 15000);
+</script>
+
+</body>
+</html>
